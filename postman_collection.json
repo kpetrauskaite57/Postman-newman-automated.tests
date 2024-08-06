@@ -36,10 +36,12 @@
 							"});\r",
 							"\r",
 							"let jsonData = pm.response.json();\r",
+							"\r",
 							"pm.test(\"Response has id\", function () {\r",
-							"    pm.expect(jsonData).to.have.property(\"id\");\r",
+							"    pm.expect(jsonData).to.have.property(\"id\").to.be.a('number').and.to.be.at.least(0);;\r",
 							"    pm.collectionVariables.set(\"createdId\", jsonData.id);\r",
 							"});\r",
+							"\r",
 							"\r",
 							"pm.test(\"Created todo exists and has correct title and description\", function () {\r",
 							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get(\"uniqueTitle\"));\r",
@@ -81,116 +83,6 @@
 			"response": []
 		},
 		{
-			"name": "Verify created Todo exists",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});\r",
-							"\r",
-							"pm.test('Response is under 500ms', () => {\r",
-							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response body is not empty\", function () {\r",
-							"    pm.expect(pm.response.text()).to.not.be.empty;\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Todo exists with correct ID\", function () {\r",
-							"    let jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData).to.exist;\r",
-							"    pm.expect(jsonData).to.be.an('object');\r",
-							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('createdId'));\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:3000/todos/{{createdId}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"todos",
-						"{{createdId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get All Todos",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Response is under 500ms\", () => {\r",
-							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Todos exist in array and have correct data\", () => {\r",
-							"    let jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData).to.exist;\r",
-							"    pm.expect(jsonData).to.be.an('array');\r",
-							"    jsonData.forEach(item => {\r",
-							"        pm.expect(item).to.be.an('object');\r",
-							"        pm.expect(item).to.have.property('id');\r",
-							"        pm.expect(item).to.have.property('title');\r",
-							"        pm.expect(item).to.have.property('description');\r",
-							"    });\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript",
-						"packages": {}
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:3000/todos",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"todos"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Get Todo by Id",
 			"event": [
 				{
@@ -205,23 +97,18 @@
 							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response body is not empty\", function () {\r",
-							"    pm.expect(pm.response.text()).to.not.be.empty;\r",
-							"});\r",
-							"\r",
 							"console.log(\"Title: \", pm.collectionVariables.get('title'));\r",
 							"console.log(\"Description: \", pm.collectionVariables.get('description'));\r",
 							"\r",
 							"pm.test(\"Created todo exists in get by id\", () => {\r",
 							"    let jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData).to.exist;\r",
-							"    pm.expect(jsonData).to.be.an('object');\r",
+							"  pm.expect(jsonData.id).to.be.a('number').and.to.be.at.least(0);\r",
 							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('createdId'));\r",
+							"      pm.expect(jsonData.title).to.be.a('string').and.have.lengthOf.at.least(1);\r",
 							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get('title'));\r",
+							"  pm.expect(jsonData.description).to.be.a('string').and.have.lengthOf.at.least(1);\r",
 							"    pm.expect(jsonData.description).to.eql(pm.collectionVariables.get('description'));\r",
-							"});\r",
-							"\r",
-							""
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -269,7 +156,7 @@
 			"response": []
 		},
 		{
-			"name": "Update Todo by ID",
+			"name": "Get All Todos",
 			"event": [
 				{
 					"listen": "test",
@@ -279,14 +166,21 @@
 							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
-							"let jsonData = pm.response.json();\r",
-							"pm.test(\"Response has correct id\", function () {\r",
-							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get(\"createdId\"));\r",
+							"pm.test(\"Response is under 500ms\", () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
 							"});\r",
 							"\r",
-							"pm.test(\"Response has updated title and description\", function () {\r",
-							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get(\"updatedTitle\"));\r",
-							"    pm.expect(jsonData.description).to.eql(pm.collectionVariables.get(\"updatedDescription\"));\r",
+							"pm.test(\"Todos exist in array and have correct data\", () => {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.be.an('array').that.is.not.empty;\r",
+							"    jsonData.forEach(item => {\r",
+							"           pm.expect(item).to.have.property('id');\r",
+							"        pm.expect(item.id).to.be.a('number').and.to.be.at.least(0);\r",
+							"        pm.expect(item).to.have.property('title');\r",
+							"        pm.expect(item.title).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"   pm.expect(item).to.have.property('description');\r",
+							"        pm.expect(item.description).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    });\r",
 							"});\r",
 							""
 						],
@@ -298,8 +192,70 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"pm.collectionVariables.set('updatedTitle', 'Updated Title');\r",
-							"pm.collectionVariables.set('updatedDescription', 'Updated Description');\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/todos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"todos"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Todo by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"\r",
+							"pm.test(\"Todo was actually updated\", function () {\r",
+							"    pm.expect(jsonData).to.have.property('id');\r",
+							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('createdId'));\r",
+							"\r",
+							"  \r",
+							"    pm.expect(jsonData.title).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get('newTitle'));\r",
+							"\r",
+							"    pm.expect(jsonData.description).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    pm.expect(jsonData.description).to.eql(pm.collectionVariables.get('newDescription'));\r",
+							"   \r",
+							"    pm.expect(jsonData.title).to.not.eql(pm.collectionVariables.get('title'));\r",
+							"    pm.expect(jsonData.description).to.not.eql(pm.collectionVariables.get('description'));\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set('newTitle', 'New Todo Title');\r",
+							"pm.collectionVariables.set('newDescription', 'New Todo Description');\r",
 							""
 						],
 						"type": "text/javascript",
@@ -312,7 +268,84 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n  \"title\": \"{{updatedTitle}}\",\r\n  \"description\": \"{{updatedDescription}}\"\r\n}\r\n",
+					"raw": "{\r\n    \"title\": \"{{newTitle}}\",\r\n    \"description\": \"{{newDescription}}\"\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/todos/{{createdId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"todos",
+						"{{createdId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Todo was updated",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Todo was actually updated\", function () {\r",
+							"    pm.expect(jsonData).to.have.property('id');\r",
+							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('createdId'));\r",
+							"\r",
+							"\r",
+							"    pm.expect(jsonData.title).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get('newTitle'));\r",
+							"\r",
+							"    pm.expect(jsonData.description).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    pm.expect(jsonData.description).to.eql(pm.collectionVariables.get('newDescription'));\r",
+							"\r",
+							"\r",
+							"    pm.expect(jsonData.title).to.not.eql(pm.collectionVariables.get('title'));\r",
+							"    pm.expect(jsonData.description).to.not.eql(pm.collectionVariables.get('description'));\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -451,6 +484,14 @@
 		},
 		{
 			"key": "description",
+			"value": ""
+		},
+		{
+			"key": "newTitle",
+			"value": ""
+		},
+		{
+			"key": "newDescription",
 			"value": ""
 		}
 	]

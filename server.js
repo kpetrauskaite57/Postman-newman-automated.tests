@@ -1,26 +1,10 @@
-require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const port = 3000;
 const { Pool } = require('pg');
 
 app.use(express.json());
-
-const pool = new Pool({
-    user: 'testuser',
-    host: 'localhost',
-    database: 'Postman-newman-automated.tests_db',
-    password: 'password',
-    port: 3000,
-  });
-  
-  pool.connect((err) => {
-    if (err) {
-      console.error('Connection error', err.stack);
-    } else {
-      console.log('Connected to the database');
-    }
-  });
 
 
 
@@ -34,7 +18,7 @@ app.post('/todos', (req, res) => {
     if (!title || !description) {
         return res.status(400).send('Title and description are required.');
     }
-    const newTodo = { id: currentId++, title, description };
+    const newTodo = { id: currentId, title, description };
     todos.push(newTodo);
     res.status(201).json(newTodo);
 });
