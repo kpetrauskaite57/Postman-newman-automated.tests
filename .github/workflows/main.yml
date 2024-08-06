@@ -6,31 +6,31 @@ on:
       
 jobs:
   postman-test-api:
-  
     runs-on: ubuntu-latest
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
+    # Checkout your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout repository
+      uses: actions/checkout@v2
       
-    # INstall Node on the runner
-    - name: Install Node
-      uses: actions/setup-node@v1
+    # Install Node.js on the runner
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
       with: 
         node-version: '16.x'
 
     # Install project dependencies
-    - name: Install Dependencies
+    - name: Install dependencies
       run: npm install
 
     # Start the Node.js application in the background
-    - name: Start Node.js Application
+    - name: Start Node.js application
       run: |
         nohup npm start &
-    
+
     # Wait for the application to be fully up and running
-    - name: Wait for Application to Start
+    - name: Wait for application to start
       run: |
-        while ! curl -s http://localhost:3000/api/users > /dev/null; do
+        while ! curl -s http://localhost:3000/todos > /dev/null; do
           echo "Waiting for application to start..."
           sleep 2
         done
@@ -42,21 +42,21 @@ jobs:
        npm install -g newman-reporter-htmlextra
 
     # Make directory to upload the test results
-    - name: Make Directory for results
+    - name: Make directory for results
       run: mkdir -p testResults
 
-    # run the postman collection to console
+    # Run the Postman collection to console
     - name: Run POSTMAN collection to console
       run: |
-       newman run ./postman-tests/user_management.postman_collection.json
+       newman run ./postman-tests/todo_app.postman_collection.json
 
-    # Run the POSTMAN collection to html report
-    - name: Run POSTMAN collection to html report
+    # Run the Postman collection to HTML report
+    - name: Run POSTMAN collection to HTML report
       run: |
-       newman run ./postman-tests/user_management.postman_collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html
+       newman run ./postman-tests/todo_app.postman_collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html
 
     # Upload the contents of Test Results directory to workspace
-    - name: Output the run Details
+    - name: Output the run details
       uses: actions/upload-artifact@v2
       with: 
        name: RunReports
