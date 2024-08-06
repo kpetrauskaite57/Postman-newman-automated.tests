@@ -1,8 +1,28 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = 3000;
+const { Pool } = require('pg');
 
 app.use(express.json());
+
+const pool = new Pool({
+    user: 'testuser',
+    host: 'localhost',
+    database: 'Postman-newman-automated.tests_db',
+    password: 'password',
+    port: 3000,
+  });
+  
+  pool.connect((err) => {
+    if (err) {
+      console.error('Connection error', err.stack);
+    } else {
+      console.log('Connected to the database');
+    }
+  });
+
+
 
 // In-memory storage for todos
 let todos = [];
