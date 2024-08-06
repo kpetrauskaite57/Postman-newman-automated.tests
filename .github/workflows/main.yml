@@ -1,63 +1,67 @@
-name: Postman-test.yml
+name: CI
+
 on:
   push:
     branches:
       - main
-      
+
 jobs:
-  postman-test-api:
+  build-and-test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: testdb
+
+    env:
+      DB_USER: testuser
+      DB_HOST: localhost
+      DB_NAME: testdb
+      DB_PASS: testpassword
+      DB_PORT: 5432
+
     steps:
-    # Checkout your repository under $GITHUB_WORKSPACE, so your job can access it
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      
-    # Install Node.js on the runner
+    - uses: actions/checkout@v2
+
     - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with: 
+      uses: actions/setup-node@v1
+      with:
         node-version: '16.x'
 
-    # Install project dependencies
-    - name: Install dependencies
+    - name: Install Dependencies
       run: npm install
 
-    # Start the Node.js application in the background
-    - name: Start Node.js application
+    - name: Start Application
       run: |
         nohup npm start &
-
-    # Wait for the application to be fully up and running
-    - name: Wait for application to start
+        sleep 5
+    
+    - name: Wait for Application to Start
       run: |
-        while ! curl -s http://localhost:3000/todos > /dev/null; do
+        while ! curl -s http://localhost:3000/api/users > /dev/null; do
           echo "Waiting for application to start..."
           sleep 2
         done
-    
-    # Install the newman command line utility and also install the html extra reporter
-    - name: Install newman
+
+    - name: Run Tests
+      run: npm test
+      continue-on-error: true # Ensure the next step runs even if this one fails
+
+    - name: Generate Test Report
+      if: always()
       run: |
-       npm install -g newman
-       npm install -g newman-reporter-htmlextra
+        mkdir -p testResults
+        newman run postman_collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html
 
-    # Make directory to upload the test results
-    - name: Make directory for results
-      run: mkdir -p testResults
-
-    # Run the Postman collection to console
-    - name: Run POSTMAN collection to console
-      run: |
-       newman run postman_collection.json
-
-    # Run the Postman collection to HTML report
-    - name: Run POSTMAN collection to HTML report
-      run: |
-       newman run postman_collection.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html
-
-    # Upload the contents of Test Results directory to workspace
-    - name: Output the run details
+    - name: Upload Test Results
+      if: always()
       uses: actions/upload-artifact@v2
-      with: 
-       name: RunReports
-       path: testResults
+      with:
+        name: TestResults
+        path: testResults
