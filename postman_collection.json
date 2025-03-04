@@ -231,10 +231,8 @@
 							"\r",
 							"\r",
 							"pm.test(\"Todo was actually updated\", function () {\r",
-							"    pm.expect(jsonData).to.have.property('id');\r",
 							"    pm.expect(jsonData.id).to.eql(pm.collectionVariables.get('createdId'));\r",
 							"\r",
-							"  \r",
 							"    pm.expect(jsonData.title).to.be.a('string').and.have.lengthOf.at.least(1);\r",
 							"    pm.expect(jsonData.title).to.eql(pm.collectionVariables.get('newTitle'));\r",
 							"\r",
@@ -314,9 +312,6 @@
 							"    pm.expect(jsonData.description).to.be.a('string').and.have.lengthOf.at.least(1);\r",
 							"    pm.expect(jsonData.description).to.eql(pm.collectionVariables.get('newDescription'));\r",
 							"\r",
-							"\r",
-							"    pm.expect(jsonData.title).to.not.eql(pm.collectionVariables.get('title'));\r",
-							"    pm.expect(jsonData.description).to.not.eql(pm.collectionVariables.get('description'));\r",
 							"});\r",
 							"\r",
 							""
@@ -329,7 +324,6 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"\r",
 							""
 						],
 						"type": "text/javascript",
@@ -362,6 +356,64 @@
 					"path": [
 						"todos",
 						"{{createdId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Todos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is under 500ms\", () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});\r",
+							"\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Todos list is an array\", function () {\r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Updated Todo is in the list\", function () {\r",
+							"    // Find the updated todo item in the list\r",
+							"    let updatedTodo = jsonData.find(todo => todo.id === pm.collectionVariables.get('createdId'));\r",
+							"    \r",
+							"    // Check that the updated todo exists\r",
+							"    pm.expect(updatedTodo).to.not.be.undefined;\r",
+							"\r",
+							"    // Verify the updated fields\r",
+							"    pm.expect(updatedTodo.title).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    pm.expect(updatedTodo.title).to.eql(pm.collectionVariables.get('newTitle'));\r",
+							"\r",
+							"    pm.expect(updatedTodo.description).to.be.a('string').and.have.lengthOf.at.least(1);\r",
+							"    pm.expect(updatedTodo.description).to.eql(pm.collectionVariables.get('newDescription'));\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/todos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"todos"
 					]
 				}
 			},
@@ -451,6 +503,57 @@
 					"path": [
 						"todos",
 						"{{createdId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Todos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let jsonData = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Todos list is an array\", function () {\r",
+							"    pm.expect(jsonData).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Deleted Todo is not in the list\", function () {\r",
+							"    // Check that the deleted todo is not in the list\r",
+							"    let deletedTodo = jsonData.find(todo => todo.id === pm.collectionVariables.get('createdId'));\r",
+							"\r",
+							"    // Verify that the todo with the deleted ID does not exist\r",
+							"    pm.expect(deletedTodo).to.be.undefined;\r",
+							"});\r",
+							"\r",
+							"pm.test('Response is under 500ms', () => {\r",
+							"    pm.expect(pm.response.responseTime).to.be.below(500);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/todos",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"todos"
 					]
 				}
 			},
